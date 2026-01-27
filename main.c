@@ -22,9 +22,7 @@ sem_t *sem_p2_to_p1 = NULL;
 static void P2SigHandler(int signum)
 {
     printf("PM(%i): Received from p2\n", getpid());
-    // shmPtr->signum = shmPtr->signum;
     sem_post(sem_parent_to_p3);
-    // //exit(1);
 }
 
 static void SetupSignals()
