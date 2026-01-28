@@ -36,8 +36,7 @@ void process3(int pipe_p2_write, int pipe_p1_read, sem_t *sem_parent_to_p3, sem_
         if (!shouldSkip)
         {
             scanf("%d", &choice);
-            while (getchar() != '\n')
-                ;
+            while (getchar() != '\n');
             if (choice == 1)
             {
                 fflush(stdout);

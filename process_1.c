@@ -33,6 +33,7 @@ void process1(mqd_t mq_p2_p1, sem_t *sem_p2_to_p1, int shmId, int pipe_p1_p3_wri
     int shouldSkip = 0;
     while (1)
     {
+
         if (!shouldSkip)
         {
             size_t bytesRead = mq_receive(mq_p2_p1, buf, MAX_TEXT_SIZE, NULL);
@@ -53,7 +54,7 @@ void process1(mqd_t mq_p2_p1, sem_t *sem_p2_to_p1, int shmId, int pipe_p1_p3_wri
                 break;
             }
             else if (shmPtr->signum == SIGTSTP)
-            {
+            {   
                 shouldSkip = 1;
             }
             else if (shmPtr->signum == SIGCONT)

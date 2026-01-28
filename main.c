@@ -159,6 +159,7 @@ int main()
 
     printf("PM(%d), P1(%d), P2(%d), P3(%d)\n", getpid(), p1_pid, p2_pid, p3_pid);
     printf("MENU\n1. stdin\n2. input.txt\nEnter choice: ");
+    fflush(stdout);
     wait(NULL);
     wait(NULL);
     wait(NULL);

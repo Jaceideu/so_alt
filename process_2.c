@@ -50,19 +50,31 @@ void process2(int pipe_p3_read, mqd_t mq_p2_p1, int shmId, sem_t *sem_p3_to_p2, 
         {
             printf("P2(%d): Read data via pipe from P3\n", getpid());
             fflush(stdout);
+
             int len = n;
-            if (buf[n - 1] == '\n')
-            {
-                len--;
+            int start = 0;
+            while (start < len) {
+                int end = start;
+                while(end < len && buf[end] != '\n' && buf[end] != '\0') {
+                    end++;
+                }
+                char buf2[MAX_TEXT_SIZE];
+                int endStart = end - start;
+                if (endStart != 0) {
+                    snprintf(buf2, MAX_TEXT_SIZE, "%i", endStart);
+                    if (mq_send(mq_p2_p1, buf2, strlen(buf2) + 1, 1) < 0)
+                    {
+                        printf("Failed to send queue message\n");
+                        exit(1);
+                    }
+                    printf("P2(%d): Send message via message queue to P1\n", getpid());
+                }
+                
+                start = end + 1;
             }
-            snprintf(buf, MAX_TEXT_SIZE, "%i", len);
-            buf[len] = '\0';
-            if (mq_send(mq_p2_p1, buf, strlen(buf) + 1, 1) < 0)
-            {
-                printf("Failed to send queue message\n");
-                exit(1);
-            }
-            printf("P2(%d): Send message via message queue to P1\n", getpid());
+
+
+            
         }
 
         if (sem_trywait(sem_p3_to_p2) == 0)
