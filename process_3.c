@@ -71,7 +71,6 @@ void process3(int pipe_p2_write, int pipe_p1_read, sem_t *sem_parent_to_p3, sem_
                     }
                     printf("P3(%d): Sent data via pipe to p2\n", getpid());
                     fflush(stdout);
-                    read(pipe_p1_read, buf, 3);
                 }
                 fclose(file);
             }

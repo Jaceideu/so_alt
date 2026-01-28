@@ -43,7 +43,6 @@ void process1(mqd_t mq_p2_p1, sem_t *sem_p2_to_p1, int shmId, int pipe_p1_p3_wri
             }
             buf[bytesRead] = '\0';
             printf("P1(%d): message received from P2: %s\n", getpid(), buf);
-            write(pipe_p1_p3_write, "ACK", 3);
         }
 
         if (sem_trywait(sem_p2_to_p1) == 0)
