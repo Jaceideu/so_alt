@@ -15,20 +15,20 @@ static void SetupSignals()
 {
     sigset_t signals;
     sigfillset(&signals);
-    sigdelset(&signals, SIGINT);
     sigprocmask(SIG_BLOCK, &signals, NULL);
 }
 
-void process3(int pipe_p2_write, sem_t *sem_parent_to_p3, sem_t *sem_p3_to_p2, int shmId)
+void process3(int pipe_p2_write, int pipe_p1_read, sem_t *sem_parent_to_p3, sem_t *sem_p3_to_p2, int shmId)
 {
 
-    shmPtr = mmap(0, sizeof(SharedData), PROT_READ, MAP_SHARED, shmId, 0);
+    SetupSignals();
+    shmPtr = mmap(0, sizeof(SharedData), PROT_WRITE | PROT_READ, MAP_SHARED, shmId, 0);
     if (!shmPtr)
     {
         printf("Failed to create shmPtr\n");
         exit(1);
     }
-    printf("MENU\n1. stdin\n2. input.txt\nEnter choice: ");
+
     int choice;
     int shouldSkip = 0;
     while (1)
@@ -50,6 +50,34 @@ void process3(int pipe_p2_write, sem_t *sem_parent_to_p3, sem_t *sem_p3_to_p2, i
                 }
                 printf("P3(%d): Sent data via pipe to p2\n", getpid());
                 fflush(stdout);
+            }
+            else if (choice == 2)
+            {
+                FILE *file = fopen("input.txt", "r");
+                if (!file)
+                {
+                    printf("Failed to open input.txt\n");
+                    exit(1);
+                }
+                char buf[MAX_TEXT_SIZE];
+                while (fgets(buf, MAX_TEXT_SIZE, file))
+                {
+                    int len = strlen(buf);
+                    if (write(pipe_p2_write, buf, len + 1) < 0)
+                    {
+                        printf("Failed to write data using pipe to p2\n");
+                        fclose(file);
+                        exit(1);
+                    }
+                    printf("P3(%d): Sent data via pipe to p2\n", getpid());
+                    fflush(stdout);
+                    read(pipe_p1_read, buf, 3);
+                }
+                fclose(file);
+            }
+            else
+            {
+                printf("Invalid choice. Enter 1 or 2.\n");
             }
         }
 

@@ -44,14 +44,19 @@ void process2(int pipe_p3_read, mqd_t mq_p2_p1, int shmId, sem_t *sem_p3_to_p2, 
     int shouldSkip = 0;
     char buf[MAX_TEXT_SIZE];
     ssize_t n;
-    while (shouldSkip || (n = read(pipe_p3_read, buf, sizeof(buf) - 1)) > 0)
+    while (shouldSkip || (n = read(pipe_p3_read, buf, MAX_TEXT_SIZE)) > 0)
     {
         if (!shouldSkip)
         {
             printf("P2(%d): Read data via pipe from P3\n", getpid());
             fflush(stdout);
-            snprintf(buf, MAX_TEXT_SIZE, "%li", n);
-
+            int len = n;
+            if (buf[n - 1] == '\n')
+            {
+                len--;
+            }
+            snprintf(buf, MAX_TEXT_SIZE, "%i", len);
+            buf[len] = '\0';
             if (mq_send(mq_p2_p1, buf, strlen(buf) + 1, 1) < 0)
             {
                 printf("Failed to send queue message\n");

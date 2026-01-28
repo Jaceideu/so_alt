@@ -31,7 +31,6 @@ static void SetupSignals()
     sigfillset(&signals);
     sigdelset(&signals, SIGUSR1);
     sigprocmask(SIG_BLOCK, &signals, NULL);
-
     signal(SIGUSR1, P2SigHandler);
 }
 
@@ -93,6 +92,13 @@ int main()
         exit(1);
     }
 
+    int pipe_p1_p3[2];
+    if (pipe(pipe_p1_p3) < 0)
+    {
+        printf("Failed to create p1-p3 pipe\n");
+        exit(1);
+    }
+
     p3_pid = fork();
     if (p3_pid < 0)
     {
@@ -102,7 +108,8 @@ int main()
     if (p3_pid == 0)
     {
         close(pipe_p3_p2[R]);
-        process3(pipe_p3_p2[W], sem_parent_to_p3, sem_p3_to_p2, shmId);
+        close(pipe_p1_p3[W]);
+        process3(pipe_p3_p2[W], pipe_p1_p3[R], sem_parent_to_p3, sem_p3_to_p2, shmId);
         exit(0);
     }
 
@@ -123,6 +130,8 @@ int main()
     if (p2_pid == 0)
     {
         close(pipe_p3_p2[W]);
+        close(pipe_p1_p3[R]);
+        close(pipe_p1_p3[W]);
         process2(pipe_p3_p2[R], mq_p2_p1, shmId, sem_p3_to_p2, sem_p2_to_p1);
         mq_close(mq_p2_p1);
         exit(0);
@@ -139,11 +148,17 @@ int main()
     }
     if (p1_pid == 0)
     {
-        process1(mq_p2_p1, sem_p2_to_p1, shmId);
+        close(pipe_p1_p3[R]);
+        process1(mq_p2_p1, sem_p2_to_p1, shmId, pipe_p1_p3[W]);
         mq_close(mq_p2_p1);
         exit(0);
     }
 
+    close(pipe_p1_p3[R]);
+    close(pipe_p1_p3[W]);
+
+    printf("PM(%d), P1(%d), P2(%d), P3(%d)\n", getpid(), p1_pid, p2_pid, p3_pid);
+    printf("MENU\n1. stdin\n2. input.txt\nEnter choice: ");
     wait(NULL);
     wait(NULL);
     wait(NULL);
@@ -157,5 +172,5 @@ int main()
     sem_unlink("/sem_p3_to_p2");
     sem_unlink("/sem_p2_to_p1");
 
-    printf("end");
+    printf("end\n");
 }
