@@ -28,23 +28,29 @@ void process3(int pipe_p2_write, sem_t *sem_parent_to_p3, sem_t *sem_p3_to_p2, i
         printf("Failed to create shmPtr\n");
         exit(1);
     }
-
+    printf("MENU\n1. stdin\n2. input.txt\nEnter choice: ");
+    int choice;
     int shouldSkip = 0;
     while (1)
     {
         if (!shouldSkip)
         {
-            printf("MENU\n1. stdin\n2. input.txt\nEnter data: ");
-            fflush(stdout);
-            char buf[MAX_TEXT_SIZE];
-            fgets(buf, MAX_TEXT_SIZE, stdin);
-            if (write(pipe_p2_write, buf, strlen(buf)) < 0)
+            scanf("%d", &choice);
+            while (getchar() != '\n')
+                ;
+            if (choice == 1)
             {
-                printf("Failed to write data using pipe to p2\n");
-                exit(1);
+                fflush(stdout);
+                char buf[MAX_TEXT_SIZE];
+                fgets(buf, MAX_TEXT_SIZE, stdin);
+                if (write(pipe_p2_write, buf, strlen(buf)) < 0)
+                {
+                    printf("Failed to write data using pipe to p2\n");
+                    exit(1);
+                }
+                printf("P3(%d): Sent data via pipe to p2\n", getpid());
+                fflush(stdout);
             }
-            printf("P3(%d): Sent data via pipe to p2\n", getpid());
-            fflush(stdout);
         }
 
         if (sem_trywait(sem_parent_to_p3) == 0)

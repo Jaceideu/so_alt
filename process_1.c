@@ -42,7 +42,7 @@ void process1(mqd_t mq_p2_p1, sem_t *sem_p2_to_p1, int shmId)
                 exit(1);
             }
             buf[bytesRead] = '\0';
-            printf("P1(%d): message received from P2: %s\n", getpid(), buf);
+            printf("P1(%d): message received from P2: %s\nMENU\n1. stdin\n2. input.txt\nEnter choice: ", getpid(), buf);
         }
 
         if (sem_trywait(sem_p2_to_p1) == 0)
