@@ -43,7 +43,7 @@ void process3(int pipe_p2_write, sem_t *sem_parent_to_p3, sem_t *sem_p3_to_p2, i
                 printf("Failed to write data using pipe to p2\n");
                 exit(1);
             }
-            printf("P3(%d): Sent data via pipe to p2 from p3\n", getpid());
+            printf("P3(%d): Sent data via pipe to p2\n", getpid());
             fflush(stdout);
         }
 
@@ -52,7 +52,7 @@ void process3(int pipe_p2_write, sem_t *sem_parent_to_p3, sem_t *sem_p3_to_p2, i
             sem_post(sem_p3_to_p2);
             if (shmPtr->signum == SIGTERM)
             {
-                printf("p3 received: %i\n", shmPtr->signum);
+                printf("P3(%i): received signal %i\n", getpid(), shmPtr->signum);
                 break;
             }
             else if (shmPtr->signum == SIGTSTP)

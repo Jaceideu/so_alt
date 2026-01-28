@@ -21,7 +21,7 @@ sem_t *sem_p2_to_p1 = NULL;
 
 static void P2SigHandler(int signum)
 {
-    printf("PM(%i): Received from p2\n", getpid());
+    printf("PM(%i): Received signal %i from p2\n", getpid(), signum);
     sem_post(sem_parent_to_p3);
 }
 
